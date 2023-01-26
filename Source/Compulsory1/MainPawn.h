@@ -28,9 +28,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterial* Blue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterial* White;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
-
+	
+	UPROPERTY(EditAnywhere, Category= "Arrays")
+	TArray<UStaticMeshComponent*> MeshArray;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -42,11 +48,25 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditAnywhere,Category="TickTackToe")
-	AGameManager* GameManager;
 
-	UPROPERTY(EditAnywhere, Category = "TickTackToe")
-	EPlayer CurrentPlayer;
+	int TurnCounter = 0;
+	TArray<int> SphereStatus;
+	
+	void OnePressed();
+	void TwoPressed();
+	void ThreePressed();
+	void FourPressed();
+	void FivePressed();
+	void SixPressed();
+	void SevenPressed();
+	void EightPressed();
+	void NinePressed();
+
+	void TurnController(int SphereIndex);
+
+	void SetSphereLocation();
+
+	void WinCheck();
 
 // put more stuff here
 

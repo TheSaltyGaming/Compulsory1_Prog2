@@ -9,42 +9,64 @@
 // Sets default values
 AMainPawn::AMainPawn()
 {
-	for (int i = 0; i < 3; i++)
-	{
-		for (int j = 0; j < 3; j++)
-		{
-			//Board[i][j] = EPlayer::None;
-		}
-	}
-
-
-
-
 	
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	MeshArray.Init(NULL,9);
 
-	RootComponent = Mesh;
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	
+	for (int i = 0; i < 9; i++)
+	{
+		MeshArray[i] = CreateDefaultSubobject<UStaticMeshComponent>(FName("Mesh" + FString::FromInt(i)));
+		//GEngine->AddOnScreenDebugMessage(-1, 10 , FColor::Red, FString::FromInt(i));
+	}
+
+	RootComponent = MeshArray[4];
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		MeshComponentAsset(TEXT("StaticMesh'/Game/StarterContent/Props/MaterialSphere.MaterialSphere'"));
+	for (int i = 0; i < 9; i++)
+	{
+		if (i != 4)
+		{
+			MeshArray[i]->SetupAttachment(GetRootComponent());
+		}
+		MeshArray[i]->SetStaticMesh(MeshComponentAsset.Object);
+		//GEngine->AddOnScreenDebugMessage(-1, 10 , FColor::Red, FString::FromInt(i));
+	}
+
+	
+	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(Mesh);
-	SpringArm->TargetArmLength = 1000.f;
+	SpringArm->SetupAttachment(GetRootComponent());
+	SpringArm->TargetArmLength = 600.f;
 	SpringArm->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm,USpringArmComponent::SocketName);
+	
+	SphereStatus.Init(NULL,9);
 
-	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+	
 
+	SetSphereLocation();
+
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 // Called when the game starts or when spawned
 void AMainPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	for (int i = 0; i < 9; i++)
+	{
+		MeshArray[i]->SetMaterial(0, White);
+	}
 	
 }
+
+
 
 // Called every frame
 void AMainPawn::Tick(float DeltaTime)
@@ -58,14 +80,146 @@ void AMainPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("ChangeColor", IE_Pressed, this, &AMainPawn::ChangeColor);
+	PlayerInputComponent->BindAction("OnePressed", IE_Pressed, this, &AMainPawn::OnePressed);
+	PlayerInputComponent->BindAction("TwoPressed", IE_Pressed, this, &AMainPawn::TwoPressed);
+	PlayerInputComponent->BindAction("ThreePressed", IE_Pressed, this, &AMainPawn::ThreePressed);
+	PlayerInputComponent->BindAction("FourPressed", IE_Pressed, this, &AMainPawn::FourPressed);
+	PlayerInputComponent->BindAction("FivePressed", IE_Pressed, this, &AMainPawn::FivePressed);
+	PlayerInputComponent->BindAction("SixPressed", IE_Pressed, this, &AMainPawn::SixPressed);
+	PlayerInputComponent->BindAction("SevenPressed", IE_Pressed, this, &AMainPawn::SevenPressed);
+	PlayerInputComponent->BindAction("EightPressed", IE_Pressed, this, &AMainPawn::EightPressed);
+	PlayerInputComponent->BindAction("NinePressed", IE_Pressed, this, &AMainPawn::NinePressed);
 
 }
 
-void AMainPawn::ChangeColor()
+void AMainPawn::TurnController(int SphereIndex)
 {
-	Mesh->SetMaterial(0,Red);
-	RedTurn = !RedTurn;
+	UE_LOG(LogTemp, Warning, TEXT("SphereIndex: %d"), SphereIndex);
+	if (SphereStatus[SphereIndex] != 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sphere is already taken"));
+		return;
+	}
+	if (TurnCounter % 2 == 0)
+	{
+		MeshArray[SphereIndex]->SetMaterial(0,Red);
+		SphereStatus [SphereIndex] = 1;
+	}
+	else
+	{
+		MeshArray[SphereIndex]->SetMaterial(0,Blue);
+		SphereStatus [SphereIndex] = 2;
+	}
+	TurnCounter++;
+
+	WinCheck();
+}
+
+void AMainPawn::WinCheck()
+{
+	//Checks vertical win condition
+	for (int i = 0; i < 3; i++)
+	{
+		if (SphereStatus[i] == 1 && SphereStatus[i+3] == 1 && SphereStatus[i+6] == 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Red win vertical"));
+		}
+		if (SphereStatus[i] == 2 && SphereStatus[i+3] == 2 && SphereStatus[i+6] == 2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Blue win vertical"));
+		}
+	}
+	//Checks horizontal win condition
+	for (int i = 0; i<9; i+=3)
+	{
+		if (SphereStatus[i] == 1 && SphereStatus[i+1] == 1 && SphereStatus[i+2] == 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Red win Horizontal"));
+		}
+		if (SphereStatus[i] == 2 && SphereStatus[i+1] == 2 && SphereStatus[i+2] == 2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Red win Horizontal"));
+		}
+	}
+#pragma region DiagonalWinCheck
+	if (SphereStatus[0] == 1 && SphereStatus[4] == 1 && SphereStatus[8] == 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Red win diagonal"));
+	}
+	if (SphereStatus[0] == 2 && SphereStatus[4] == 2 && SphereStatus[8] == 2)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Blue win diagonal"));
+	}
+	if (SphereStatus[2] == 1 && SphereStatus[4] == 1 && SphereStatus[6] == 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Red win diagonal"));
+	}
+	if (SphereStatus[2] == 2 && SphereStatus[4] == 2 && SphereStatus[6] == 2)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Blue win diagonal"));
+	}
+#pragma endregion 
+}
+
+
+void AMainPawn::SetSphereLocation()
+{
+	MeshArray[0]->SetRelativeLocation(FVector(200.f, -200.f, 0.f));
+	MeshArray[1]->SetRelativeLocation(FVector(200.f, 0.f, 0.f));
+	MeshArray[2]->SetRelativeLocation(FVector(200.f, 200.f, 0.f));
+	MeshArray[3]->SetRelativeLocation(FVector(0.f, -200.f, 0.f));
+	MeshArray[4]->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	MeshArray[5]->SetRelativeLocation(FVector(0.f, 200.f, 0.f));
+	MeshArray[6]->SetRelativeLocation(FVector(-200.f, -200.f, 0.f));
+	MeshArray[7]->SetRelativeLocation(FVector(-200.f, 0.f, 0.f));
+	MeshArray[8]->SetRelativeLocation(FVector(-200.f, 200.f, 0.f));
+}
+
+
+void AMainPawn::OnePressed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnePressed"));
+	TurnController(0);
+}
+
+void AMainPawn::TwoPressed()
+{
+	TurnController(1);
+}
+
+void AMainPawn::ThreePressed()
+{
+	TurnController(2);
+}
+
+void AMainPawn::FourPressed()
+{
+	TurnController(3);
+}
+
+void AMainPawn::FivePressed()
+{
+	TurnController(4);
+}
+
+void AMainPawn::SixPressed()
+{
+	TurnController(5);
+}
+
+void AMainPawn::SevenPressed()
+{
+	TurnController(6);
+}
+
+void AMainPawn::EightPressed()
+{
+	TurnController(7);
+}
+
+void AMainPawn::NinePressed()
+{
+	TurnController(8);
 }
 
 
