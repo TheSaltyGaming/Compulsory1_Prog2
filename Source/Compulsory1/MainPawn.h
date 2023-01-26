@@ -11,6 +11,8 @@ class UCameraComponent;
 class USpringArmComponent;
 class UMaterial;
 
+class USpotLightComponent;
+
 UCLASS()
 class COMPULSORY1_API AMainPawn : public APawn
 {
@@ -36,7 +38,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category= "Arrays")
 	TArray<UStaticMeshComponent*> MeshArray;
-	
+
+	UPROPERTY(EditAnywhere, Category = "Arrays")
+	TArray<USpotLightComponent*> LightArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)

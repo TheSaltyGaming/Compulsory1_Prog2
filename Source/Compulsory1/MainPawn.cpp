@@ -4,6 +4,7 @@
 #include "MainPawn.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -14,6 +15,7 @@ AMainPawn::AMainPawn()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshArray.Init(NULL,9);
+	LightArray.Init(NULL, 3);
 
 	
 	for (int i = 0; i < 9; i++)
@@ -33,6 +35,10 @@ AMainPawn::AMainPawn()
 		}
 		MeshArray[i]->SetStaticMesh(MeshComponentAsset.Object);
 		//GEngine->AddOnScreenDebugMessage(-1, 10 , FColor::Red, FString::FromInt(i));
+	}
+	for (int i = 0; i < LightArray.Num(); i++)
+	{
+		LightArray[i] = CreateDefaultSubobject<USpotLightComponent>(FName("SpotLight" + FString::FromInt(i)));
 	}
 
 	
@@ -72,7 +78,23 @@ void AMainPawn::BeginPlay()
 void AMainPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	for (int i = 0; i <LightArray.Num(); i++)
+	{
+		if (LightArray[i] != NULL && TurnCounter % 2 == 0)
+		{
+			LightArray[0]->SetLightColor(FColor::Red);
+			LightArray[1]->SetLightColor(FColor::Red);
+			LightArray[2]->SetLightColor(FColor::Red);
+			
+		}
+		else if (LightArray[i] != NULL && TurnCounter % 2 == 1)
+		{
+			LightArray[0]->SetLightColor(FColor::Blue);
+			LightArray[1]->SetLightColor(FColor::Blue);
+			LightArray[2]->SetLightColor(FColor::Blue);
+		}
+	}
 }
 
 // Called to bind functionality to input
