@@ -116,6 +116,8 @@ void AMainPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMainPawn::TurnController(int SphereIndex)
 {
+	if (gameOver) return;
+	
 	UE_LOG(LogTemp, Warning, TEXT("SphereIndex: %d"), SphereIndex);
 	if (SphereStatus[SphereIndex] != 0)
 	{
@@ -145,10 +147,16 @@ void AMainPawn::WinCheck()
 		if (SphereStatus[i] == 1 && SphereStatus[i+3] == 1 && SphereStatus[i+6] == 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Red win vertical"));
+			GEngine->AddOnScreenDebugMessage(1,60,FColor::Red,TEXT("Red Wins"));
+			gameOver = true;
+			TurnCounter++;
 		}
 		if (SphereStatus[i] == 2 && SphereStatus[i+3] == 2 && SphereStatus[i+6] == 2)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Blue win vertical"));
+			GEngine->AddOnScreenDebugMessage(1,60,FColor::Blue,TEXT("Blue Wins"));
+			gameOver = true;
+			TurnCounter++;
 		}
 	}
 	//Checks horizontal win condition
@@ -157,28 +165,46 @@ void AMainPawn::WinCheck()
 		if (SphereStatus[i] == 1 && SphereStatus[i+1] == 1 && SphereStatus[i+2] == 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Red win Horizontal"));
+			gameOver = true;
+			TurnCounter++;
+			GEngine->AddOnScreenDebugMessage(1,60,FColor::Red,TEXT("Red Wins"));
 		}
 		if (SphereStatus[i] == 2 && SphereStatus[i+1] == 2 && SphereStatus[i+2] == 2)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Red win Horizontal"));
+			UE_LOG(LogTemp, Warning, TEXT("Blue win Horizontal"));
+			gameOver = true;
+			TurnCounter++;
+			GEngine->AddOnScreenDebugMessage(1,60,FColor::Blue,TEXT("Blue Wins"));
 		}
 	}
 #pragma region DiagonalWinCheck
 	if (SphereStatus[0] == 1 && SphereStatus[4] == 1 && SphereStatus[8] == 1)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red win diagonal"));
+		gameOver = true;
+		TurnCounter++;
+		GEngine->AddOnScreenDebugMessage(1,60,FColor::Red,TEXT("Red Wins"));
 	}
 	if (SphereStatus[0] == 2 && SphereStatus[4] == 2 && SphereStatus[8] == 2)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Blue win diagonal"));
+		gameOver = true;
+		TurnCounter++;
+		GEngine->AddOnScreenDebugMessage(1,60,FColor::Blue,TEXT("Blue Wins"));
 	}
 	if (SphereStatus[2] == 1 && SphereStatus[4] == 1 && SphereStatus[6] == 1)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red win diagonal"));
+		gameOver = true;
+		TurnCounter++;
+		GEngine->AddOnScreenDebugMessage(1,60,FColor::Blue,TEXT("Red Wins"));
 	}
 	if (SphereStatus[2] == 2 && SphereStatus[4] == 2 && SphereStatus[6] == 2)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Blue win diagonal"));
+		gameOver = true;
+		TurnCounter++;
+		GEngine->AddOnScreenDebugMessage(1,60,FColor::Red,TEXT("Blue Wins"));
 	}
 #pragma endregion 
 }

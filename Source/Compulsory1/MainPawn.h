@@ -45,6 +45,11 @@ public:
 	UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float BlueDivide = 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float RedDivide = 1;
 	
 
 protected:
@@ -55,6 +60,7 @@ private:
 
 	int TurnCounter = 0;
 	TArray<int> SphereStatus;
+	bool gameOver = false;
 	
 	void OnePressed();
 	void TwoPressed();
